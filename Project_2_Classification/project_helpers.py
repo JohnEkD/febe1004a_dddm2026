@@ -39,10 +39,8 @@ class needs:
         if kind is None:
             return False
         if not issubclass(kind, Exception):
-            return False        # let Ctrl-C and the like through untouched
+            return False
         if kind is AssertionError:
-            # the answer exists but is not right, so do not tell the student
-            # the question is unfinished or that nothing else is wrong
             print('STOP. %s has an answer, but it is not right yet.'
                   % self.question)
             print(str(value)[:140])
@@ -72,7 +70,6 @@ def summary(question_id):
     if spec is None:
         raise KeyError('no summary is defined for %s' % question_id)
 
-    # the student's variables live in the notebook, not in this module
     env = inspect.currentframe().f_back.f_globals
     label = spec['question']
 
@@ -84,10 +81,6 @@ def summary(question_id):
         print('(no answer yet for %s)' % ', '.join(unanswered))
         return
 
-    # The names exist and are not blank, so anything failing now is a wrong
-    # answer and not a missing one. A bare `with needs(...)` cannot tell those
-    # apart unless the failure is an AssertionError, and would tell a student
-    # who has answered the question to go and finish it.
     try:
         spec['draw'](env)
     except Exception as e:
@@ -100,8 +93,6 @@ def _ladywood_map(e):
     np, plots, Table = e['np'], e['plots'], e['Table']
     centroids = Table.read_table('birmingham_centroids.csv')
     mapped = e['lsoas'].join('LSOA', centroids)
-    # the ten from the student's own closest_ten, not a fresh calculation, so
-    # the map shows what they actually produced
     near = e['closest_ten'].select('LSOA').join('LSOA', centroids)
 
     plots.figure(figsize=(7, 7))
